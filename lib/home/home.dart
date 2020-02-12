@@ -16,6 +16,17 @@ class _HomeState extends State<Home> {
 
   List _todoList = [];
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _readData().then((data){
+      setState(() {
+        _todoList = json.decode(data);
+      });
+    });
+  }
+
   void _addTodo() {
     setState(() {
       Map<String, dynamic> newTodo = Map();
@@ -23,6 +34,8 @@ class _HomeState extends State<Home> {
       _todoConttoller.text = "";
       newTodo["ok"] = false;
       _todoList.add(newTodo);
+
+      _saveData();
     });
   }
 
@@ -71,6 +84,8 @@ class _HomeState extends State<Home> {
                     onChanged: (c){
                       setState(() {
                         _todoList[index]["ok"] = c;
+
+                        _saveData();
                       });
                     },
                     title: Text(_todoList[index]["title"]),
