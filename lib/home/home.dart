@@ -16,6 +16,9 @@ class _HomeState extends State<Home> {
 
   List _todoList = [];
 
+  Map<String, dynamic> _lastRemove;
+  int _LastRemovePosition;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -25,6 +28,23 @@ class _HomeState extends State<Home> {
         _todoList = json.decode(data);
       });
     });
+  }
+
+  Future<Null> _refresh() async{
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _todoList.sort((a,b){
+        if(a["ok"] && !b["ok"]){
+          return 1;
+        }else if(!a["ok"] && b["ok"]){
+          return -1;
+        }else{
+          return 0;
+        }
+      });
+      _saveData();
+    });
+    return null;
   }
 
   void _addTodo() {
@@ -76,32 +96,73 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(top: 10.0),
+            child: RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView.builder(
+                padding: EdgeInsets.only(top: 10.0),
                 itemCount: _todoList.length,
-                itemBuilder: (context, index){
-                  return CheckboxListTile(
-                    onChanged: (c){
-                      setState(() {
-                        _todoList[index]["ok"] = c;
-
-                        _saveData();
-                      });
-                    },
-                    title: Text(_todoList[index]["title"]),
-                    value: _todoList[index]["ok"],
-                    secondary: CircleAvatar(
-                    child: Icon(
-                    _todoList[index]["ok"] ? Icons.check : Icons.error
-                  ),
-                ),
-              );
-            }),
+                itemBuilder: buildItem,
+              ),
+            )
           )
         ],
       ),
     );
   }
+
+  Widget buildItem (context, index){
+    return Dismissible(
+      background: Container(
+        color: Colors.red,
+        child: Align(
+          alignment: Alignment(-0.9, 0.0),
+          child: Icon(Icons.delete, color: Colors.white,),
+        ),
+      ),
+      direction: DismissDirection.startToEnd,
+      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+      onDismissed: (direction){
+        setState(() {
+          _lastRemove = Map.from(_todoList[index]);
+          _LastRemovePosition = index;
+          _todoList.removeAt(index);
+          _saveData();
+          
+          final snack = SnackBar(
+              content: Text("Tarefa ${_lastRemove["title"]} removida!"),
+            action: SnackBarAction(
+                label: "Desfazer",
+                onPressed: (){
+                  setState(() {
+                    _todoList.insert(_LastRemovePosition, _lastRemove);
+                    _saveData();
+                  });
+                }),
+            duration: Duration(seconds: 2),
+          );
+          Scaffold.of(context).removeCurrentSnackBar();    // ADICIONE ESTE COMANDO
+          Scaffold.of(context).showSnackBar(snack);
+        });
+      },
+      child: CheckboxListTile(
+        onChanged: (c){
+          setState(() {
+            _todoList[index]["ok"] = c;
+            _saveData();
+          });
+        },
+        title: Text(_todoList[index]["title"]),
+        value: _todoList[index]["ok"],
+        secondary: CircleAvatar(
+          child: Icon(
+              _todoList[index]["ok"] ? Icons.check : Icons.error
+          ),
+        ),
+      ),
+    );
+  }
+
+
   Future<File> _getFile() async{
     final directory = await getApplicationDocumentsDirectory();
     return File("${directory.path}/data.json");
