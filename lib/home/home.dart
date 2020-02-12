@@ -12,15 +12,73 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  final _todoConttoller = TextEditingController();
+
   List _todoList = [];
+
+  void _addTodo() {
+    setState(() {
+      Map<String, dynamic> newTodo = Map();
+      newTodo["tile"] = _todoConttoller;
+      _todoConttoller.text = "";
+      newTodo["ok"] = false;
+      _todoList.add(newTodo);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            "Lista de Tarefas"
-        )
+            "Lista de Tarefas",
+        ),
+        backgroundColor: Colors.blueAccent,
+        centerTitle: true,
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.fromLTRB(17.0, 1.0, 7.0, 1.0),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
+                    controller: _todoConttoller,
+                  decoration: InputDecoration(
+                    labelText: "Nova Tarefa",
+                    labelStyle: TextStyle(
+                      color: Colors.blueAccent,
+                    )
+                  ),
+                ),
+                ),
+                RaisedButton(
+                  color: Colors.blueAccent,
+                  child: Text("ADD"),
+                  textColor: Colors.white,
+                  onPressed: _addTodo,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.only(top: 10.0),
+                    itemCount: _todoList.length,
+                    itemBuilder: (context, index){
+                      return CheckboxListTile(
+                        title: Text(_todoList[index]["Title"]),
+                        value: _todoList[index]["ok"],
+                        secondary: CircleAvatar(
+                          child: Icon(
+                            _todoList[index]["ok"] ? Icons.check : Icons.error
+                          ),
+                        ),
+                      );
+                    }),
+                )
+        ],
       ),
     );
   }
