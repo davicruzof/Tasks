@@ -56,7 +56,6 @@ class _HomeState extends State<Home> {
       _saveData();
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,12 +67,13 @@ class _HomeState extends State<Home> {
         centerTitle: true,
         actions: <Widget>[
           IconButton(
-              splashRadius: 22,
-              icon: Icon(
-                Icons.delete,
-                color: Colors.white,
-              ),
-              onPressed: () {}),
+            splashRadius: 22,
+            icon: Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            onPressed: (){},
+          ),
         ],
       ),
       body: Column(
@@ -144,7 +144,10 @@ class _HomeState extends State<Home> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),
             ),
-            content: Text("Tarefa ${_lastRemove["title"]} removida!",style: TextStyle(color: Colors.blueGrey),),
+            content: Text(
+              "Tarefa removida!",
+              style: TextStyle(color: Colors.blueGrey),
+            ),
             action: SnackBarAction(
                 label: "Desfazer",
                 textColor: Colors.blueGrey,
@@ -161,6 +164,8 @@ class _HomeState extends State<Home> {
         });
       },
       child: CheckboxListTile(
+        checkColor: Colors.white,
+        activeColor: Colors.greenAccent,
         onChanged: (c) {
           setState(() {
             _todoList[index]["ok"] = c;
@@ -170,8 +175,9 @@ class _HomeState extends State<Home> {
         title: Text(_todoList[index]["title"]),
         value: _todoList[index]["ok"],
         secondary: CircleAvatar(
-          child: Icon(_todoList[index]["ok"] ? Icons.check : Icons.error),
-        ),
+            backgroundColor: Colors.lightBlueAccent,
+            foregroundColor: Colors.white,
+            child: Icon(_todoList[index]["ok"] ? Icons.check : Icons.list)),
       ),
     );
   }
