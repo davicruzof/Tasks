@@ -11,7 +11,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   final _todoConttoller = TextEditingController();
 
   List _todoList = [];
@@ -21,24 +20,23 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    
     super.initState();
-    _readData().then((data){
+    _readData().then((data) {
       setState(() {
         _todoList = json.decode(data);
       });
     });
   }
 
-  Future<Null> _refresh() async{
+  Future<Null> _refresh() async {
     await Future.delayed(Duration(seconds: 1));
     setState(() {
-      _todoList.sort((a,b){
-        if(a["ok"] && !b["ok"]){
+      _todoList.sort((a, b) {
+        if (a["ok"] && !b["ok"]) {
           return 1;
-        }else if(!a["ok"] && b["ok"]){
+        } else if (!a["ok"] && b["ok"]) {
           return -1;
-        }else{
+        } else {
           return 0;
         }
       });
@@ -64,11 +62,11 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            "Lista de Tarefas",
+          "Lista de Tarefas",
         ),
         backgroundColor: Colors.lightBlueAccent,
         centerTitle: true,
-          actions: <Widget>[
+        actions: <Widget>[
           IconButton(
               splashRadius: 22,
               icon: Icon(
@@ -88,11 +86,10 @@ class _HomeState extends State<Home> {
                   child: TextField(
                     controller: _todoConttoller,
                     decoration: InputDecoration(
-                      labelText: "Nova Tarefa",
-                      labelStyle: TextStyle(
-                        color: Colors.lightBlueAccent,
-                      )
-                    ),
+                        labelText: "Nova Tarefa",
+                        labelStyle: TextStyle(
+                          color: Colors.lightBlueAccent,
+                        )),
                   ),
                 ),
                 RaisedButton(
@@ -108,56 +105,63 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refresh,
-              child: ListView.builder(
-                padding: EdgeInsets.only(top: 10.0),
-                itemCount: _todoList.length,
-                itemBuilder: buildItem,
-              ),
-            )
-          )
+              child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView.builder(
+              padding: EdgeInsets.only(top: 10.0),
+              itemCount: _todoList.length,
+              itemBuilder: buildItem,
+            ),
+          ))
         ],
       ),
     );
   }
 
-  Widget buildItem (context, index){
+  Widget buildItem(context, index) {
     return Dismissible(
       background: Container(
-        color: Colors.red,
+        color: Colors.redAccent,
         child: Align(
           alignment: Alignment(-0.9, 0.0),
-          child: Icon(Icons.delete, color: Colors.white,),
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
         ),
       ),
       direction: DismissDirection.startToEnd,
       key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-      onDismissed: (direction){
+      onDismissed: (direction) {
         setState(() {
           _lastRemove = Map.from(_todoList[index]);
           _LastRemovePosition = index;
           _todoList.removeAt(index);
           _saveData();
-          
+
           final snack = SnackBar(
-              content: Text("Tarefa ${_lastRemove["title"]} removida!"),
+            backgroundColor: Colors.greenAccent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            content: Text("Tarefa ${_lastRemove["title"]} removida!",style: TextStyle(color: Colors.blueGrey),),
             action: SnackBarAction(
                 label: "Desfazer",
-                onPressed: (){
+                textColor: Colors.blueGrey,
+                onPressed: () {
                   setState(() {
                     _todoList.insert(_LastRemovePosition, _lastRemove);
                     _saveData();
                   });
                 }),
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 4),
           );
-          Scaffold.of(context).removeCurrentSnackBar();    // ADICIONE ESTE COMANDO
+          Scaffold.of(context).removeCurrentSnackBar(); // ADICIONE ESTE COMANDO
           Scaffold.of(context).showSnackBar(snack);
         });
       },
       child: CheckboxListTile(
-        onChanged: (c){
+        onChanged: (c) {
           setState(() {
             _todoList[index]["ok"] = c;
             _saveData();
@@ -166,31 +170,28 @@ class _HomeState extends State<Home> {
         title: Text(_todoList[index]["title"]),
         value: _todoList[index]["ok"],
         secondary: CircleAvatar(
-          child: Icon(
-              _todoList[index]["ok"] ? Icons.check : Icons.error
-          ),
+          child: Icon(_todoList[index]["ok"] ? Icons.check : Icons.error),
         ),
       ),
     );
   }
 
-
-  Future<File> _getFile() async{
+  Future<File> _getFile() async {
     final directory = await getApplicationDocumentsDirectory();
     return File("${directory.path}/data.json");
   }
 
-  Future<File> _saveData() async{
+  Future<File> _saveData() async {
     String data = json.encode(_todoList);
     final file = await _getFile();
     return file.writeAsString(data);
   }
 
-  Future<String> _readData() async{
-    try{
+  Future<String> _readData() async {
+    try {
       final file = await _getFile();
       return file.readAsString();
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
