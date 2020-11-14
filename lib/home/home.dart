@@ -66,8 +66,17 @@ class _HomeState extends State<Home> {
         title: Text(
             "Lista de Tarefas",
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Colors.lightBlueAccent,
         centerTitle: true,
+          actions: <Widget>[
+          IconButton(
+              splashRadius: 22,
+              icon: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+              onPressed: () {}),
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -81,13 +90,16 @@ class _HomeState extends State<Home> {
                     decoration: InputDecoration(
                       labelText: "Nova Tarefa",
                       labelStyle: TextStyle(
-                        color: Colors.blueAccent,
+                        color: Colors.lightBlueAccent,
                       )
                     ),
                   ),
                 ),
                 RaisedButton(
-                  color: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  color: Colors.lightBlueAccent,
                   child: Text("ADD"),
                   textColor: Colors.white,
                   onPressed: _addTodo,
